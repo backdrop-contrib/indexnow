@@ -1,0 +1,9 @@
+name = IndexNow 
+description = Inform search engines about new or updated content via IndexNow protocol.
+package = SEO
+backdrop = 1.x
+type = module
+
+configure = admin/config/metadata/indexnow
+
+version = 1.0.1 
