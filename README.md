@@ -9,6 +9,7 @@ More information about IndexNow protocol you can get on [official site.](https:/
 Installation
 ------------
 Install this module using the official Backdrop CMS instructions at https://backdropcms.org/guide/modules    
+
 **Please note:** [PHP cURL](http://php.net/manual/en/curl.setup.php) library must be installed on your server. 
 
 Configuration and usage
@@ -16,7 +17,7 @@ Configuration and usage
 Administration page is available via menu *Administration > Configuration > 
 Metadata > IndexNow* (admin/config/metadata/indexnow). 
 
-- first you need generate or use your own IndexNow API key as described below "IndexNow API key" field;   
+- first you need generate or create your own IndexNow API key as described below "IndexNow API key" field;   
 - select your prefered search engine;
 - select what content types to submit when you create or update nodes.
 
@@ -29,8 +30,9 @@ Thus, multiple edits of the same node do not result in multiple submissions.
 
 Known issues
 ------------
-If you've enabled "fast_404()" in your "settings.php" file, search engines most likely 
-won't be able to retrieve your text key file to verify site ownership.    
+If you've enabled "Fast 404 pages" functionality in your "settings.php" file, 
+search engines most likely won't be able to retrieve your text key file to verify site ownership.    
+
 To avoid this problem, consider removing the "txt" extension from "404_fast_paths".
 
 License

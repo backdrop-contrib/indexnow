@@ -19,7 +19,7 @@ function indexnow_settings_form($form, &$form_state) {
     '#default_value' => $api_key,
     '#size' => 96,
     '#description' => t("Generate a <a href='@key'>free API key</a>, copy and paste the generated API key to the field above.", array('@key' => 'https://www.bing.com/indexnow#generateApiKey')) . '<br>'
-     . t('Alternatively, you can use any set of 8 - 128 characters containing only Latin letters and numbers, for example: ') . '<br>' 
+     . t('Alternatively, you can create any set of 8 - 128 characters containing only Latin letters and numbers, for example: ') . '<br>' 
     . '<em>UvD8ykmdNLlxYEi2LkhJjYOH2kyQbJqM3cAKT4fs</em>' . '<br>'
     . t('Do not worry about creating a verification file, it will be created for you automatically.'), 
   );
@@ -32,7 +32,8 @@ function indexnow_settings_form($form, &$form_state) {
       'yandex' => t('Yandex'),
     ),
     '#default_value' => $config->get('searchengine'),
-    '#description' => t('Select preferred search engine.'),
+    '#description' => t('Select preferred search engine.') . '<br>'
+    . t('Please note: starting November 2021, IndexNow-enabled search engines will share immediately all URLs submitted to all other IndexNow-enabled search engines, so when you notify one, you will notify all search engines.'),
   );
   
   $node_types    = node_type_get_types();

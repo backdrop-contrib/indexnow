@@ -6,4 +6,4 @@ type = module
 
 configure = admin/config/metadata/indexnow
 
-version = 1.0.1 
+version = 1.0.2 

@@ -107,7 +107,7 @@ function indexnow_output() {
 }
 
 /**
- * Get URLs of recently changed / created nodes
+ * Get URLs of recently changed / created / published nodes
  * 
  * @return array of URLs
  */
@@ -128,6 +128,7 @@ function indexnow_get_urls() {
     ->fields('n')
     ->condition('n.type', $types, 'IN')  
     ->condition('n.changed', array($last, $now), 'BETWEEN')
+    ->condition('n.status', 0, '>')  
     ->execute()
     ->fetchAll();
   
@@ -146,7 +147,7 @@ function indexnow_get_urls() {
 function indexnow_send_urls() {
   global $base_url;
   $urls = indexnow_get_urls();
-  
+
   if (empty($urls)) {
     return;
   }
