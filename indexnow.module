@@ -52,31 +52,31 @@ function indexnow_menu() {
       'type' => MENU_CALLBACK,
     );
   }
-  
+
   return $items;
 }
 
 /**
  * Save API key to file
  * @param string $api_key
- * @return boolean 
+ * @return boolean
  */
 function indexnow_file_save($api_key) {
   if (empty($api_key)) {
     return FALSE;
   }
-    
+
   $file_dir  = 'public://indexnow';
   $file_path = $file_dir . '/' . $api_key . '.txt';
-  
+
   if (!file_exists($file_dir)) {
     backdrop_mkdir($file_dir);
   }
 
   file_put_contents($file_path, $api_key);
-  
+
   $success = file_exists($file_path);
-  
+
   if ($success) {
     watchdog('IndexNow', 'IndexNow API key file saved.');
     backdrop_set_message(t('IndexNow API key file saved successfully.'));
@@ -108,37 +108,37 @@ function indexnow_output() {
 
 /**
  * Get URLs of recently changed / created / published nodes
- * 
+ *
  * @return array of URLs
  */
 function indexnow_get_urls() {
   $config = config('indexnow.settings');
   $content_types = $config->get('content_types');
   $types = array_values($content_types);
-  
+
   foreach (array_keys($types, 0, true) as $key) {
     unset($types[$key]);
   }
-  
+
   $urls = array();
   $last = state_get('indexnow_last_time');
   $now  = time();
-  
+
   $nodes = db_select('node', 'n')
     ->fields('n')
-    ->condition('n.type', $types, 'IN')  
+    ->condition('n.type', $types, 'IN')
     ->condition('n.changed', array($last, $now), 'BETWEEN')
-    ->condition('n.status', 0, '>')  
+    ->condition('n.status', 0, '>')
     ->execute()
     ->fetchAll();
-  
+
   if (!empty($nodes)) {
     foreach ($nodes as $node) {
-      $urls[] = url('node/' . $node->nid, array('absolute' => TRUE));  
+      $urls[] = url('node/' . $node->nid, array('absolute' => TRUE));
     }
   }
-  
-  return $urls;  
+
+  return $urls;
 }
 
 /**
@@ -146,16 +146,22 @@ function indexnow_get_urls() {
  */
 function indexnow_send_urls() {
   global $base_url;
+  $config        = config('indexnow.settings');
+  $api_key       = $config->get('indexnow_api_key');
+  $searchengine  = $config->get('searchengine');
+  $content_types = $config->get('content_types');
+  $post_to = '';
+
+  if (empty($api_key) || empty($content_types)) {
+    return;
+  }
+
   $urls = indexnow_get_urls();
 
   if (empty($urls)) {
     return;
   }
 
-  $config       = config('indexnow.settings');
-  $api_key      = $config->get('indexnow_api_key');
-  $searchengine = $config->get('searchengine');
-  
   switch ($searchengine) {
     case 'bing':
       $post_to = 'https://www.bing.com/IndexNow';
@@ -166,52 +172,49 @@ function indexnow_send_urls() {
   }
 
   $host = filter_input(INPUT_SERVER, 'SERVER_NAME', FILTER_SANITIZE_SPECIAL_CHARS);
-  
+
   $data = array (
     "host" => $host,
     "key" => $api_key,
     "keyLocation" => $base_url . '/' . $api_key . '.txt',
     "urlList" => $urls
   );
-  
+
   $data_encoded = backdrop_json_encode($data, TRUE);
-  
+
   $ch = curl_init();
-  
+
   curl_setopt($ch, CURLOPT_URL, $post_to);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
   curl_setopt($ch, CURLOPT_POST, TRUE);
   curl_setopt($ch, CURLINFO_HEADER_OUT, TRUE);
   curl_setopt($ch, CURLOPT_POSTFIELDS, $data_encoded);
-
   curl_setopt($ch, CURLOPT_HTTPHEADER, array(
     'Content-Type: application/json; charset=utf-8',
     'Content-Length: ' . strlen($data_encoded)
     )
   );
-  
   curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-  
   curl_exec($ch);
-  
+
   if (!curl_errno($ch)) {
     switch ($httpcode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE)) {
       case 200:
       case 202:
         watchdog('IndexNow', 'Recently created or updated content URLs have been submitted to search engines.');
-        state_set('indexnow_last_time', time()); 
+        state_set('indexnow_last_time', time());
         break;
       default:
         watchdog('IndexNow',
           'HTTP response code: '  . $httpcode . ',<br>' .
-          'Please check search engine documentation.', 
+          'Please check search engine documentation.',
           NULL,
           WATCHDOG_WARNING
         );
     }
   }
-  
+
   curl_close($ch);
 }
 
